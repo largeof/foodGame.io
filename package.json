@@ -1,10 +1,11 @@
 {
   "name": "foodgamemultiplayer",
   "version": "1.0.0",
-  "description": "Food game with socket.io",
-  "main": "index.js",
+  "description": "Web application where users can in a group can connect with their own device and decide where to eat.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",

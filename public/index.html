@@ -2,11 +2,17 @@
 <html>
 <head>
 <title>Basic Start</title>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="index.js"></script>
 </head>
 <body>
 
 <h1>This is a Heading</h1>
-<p>This is a paragraph.</p>
+
+<input type="text" id="inputText">
+<input type="button" value="SUBMIT" onClick="sendInputText()">
+
+<p id="pText"></p>
 
 </body>
 </html>
