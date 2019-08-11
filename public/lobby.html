@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Food Game</title>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="index.js"></script>
+
+</head>
+<body onload="lobbyLoaded()">
+
+<h1>Lobby!</h1>
+
+<div>
+    <label type="text">Places per player:</label>
+    <input type="text">
+</div>
+
+<div id="players">
+    <p>Current Players: </p>
+</div>
+
+<input type="button" value="Start Game!" onClick="startGame()">
+
+</body>
+</html>

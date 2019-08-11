@@ -1,4 +1,4 @@
-//killall -9 node
+//killall -9 node if error
 
 var express = require('express');
 // Create the app
@@ -17,9 +17,17 @@ function listen() {
 
 app.use(express.static('public'));
 
+//if there is url parameter
+app.get("/:word", function(req, res) {
+  let word = req.params.word;
+  res.sendFile( __dirname + "/public/lobby.html");
+});
+
+
 // WebSocket Portion
 // WebSockets work with the HTTP server
 var io = require('socket.io')(server);
+var rooms = {};
 
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
@@ -29,23 +37,22 @@ io.sockets.on('connection',
   
     console.log("We have a new client: " + socket.id);
 
-    socket.broadcast.emit('new', socket.id);
-
-    socket.on('message',
-      function(data) {
-        // Data comes in as whatever was sent, including objects
-        console.log("Received: 'message' " + data);
-      
-        // Send it to all other clients
-        socket.broadcast.emit('message', data);
-        
-        // This is a way to send to everyone including sender
-        // io.sockets.emit('message', "this goes to everyone");
-
+    socket.on('joinroom', function(room) {
+      console.log("The client joined " + room);
+      this.join(room);
+      if (typeof rooms[room] === 'undefined')
+      {
+        rooms[room] = {count: 1};
       }
-    );
+      else
+      {
+        rooms[room].count++;
+      }
+      io.to(room).emit("new user", rooms[room].count)
+    });
     
     socket.on('disconnect', function() {
+      //if part of a room subtract them from it?
       console.log("Client has disconnected");
     });
   }

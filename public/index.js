@@ -1,20 +1,29 @@
-var socket;
+var socket = io('/');
+var globTest;
 
-function sendInputText()
+
+function createRoom()
 {
   console.log("test");
 
-  let userInput = document.getElementById("inputText").value;
-  
-  socket.emit('message', userInput)
+  let randString = "aBc"; //testing
+
+  localStorage.setItem("name", document.getElementById("hostName").value);
+
+  window.location = window.location.href + randString;
 }
 
-socket = io();
-socket.on('message',
-// When we receive data
-function(data) 
+function lobbyLoaded()
 {
-  document.getElementById("pText").innerHTML += data + "<br>";
-}   );
+  console.log(localStorage.getItem("name"));
 
-//send message
+  console.log(window.location.pathname.split('/')[1]); // this is the first url arg
+
+  socket.emit('joinroom', window.location.pathname.split('/')[1]);
+
+  //test
+  socket.on("new user", function(data) {
+    console.log("New user. Total users: ", data); 
+  });
+}
+
