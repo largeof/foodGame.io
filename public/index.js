@@ -9,7 +9,7 @@ function sendInputText()
   socket.emit('message', userInput)
 }
 
-socket = io.connect('http://localhost:3000/');
+socket = io();
 socket.on('message',
 // When we receive data
 function(data) 
