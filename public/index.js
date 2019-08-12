@@ -19,7 +19,10 @@ function lobbyLoaded()
 
   console.log(window.location.pathname.split('/')[1]); // this is the first url arg
 
-  socket.emit('joinroom', window.location.pathname.split('/')[1]);
+  //send object with 
+  socket.emit('joinroom', {nickname: localStorage.getItem("name"), room: window.location.pathname.split('/')[1]});
+
+  //
 
   //test
   socket.on("new user", function(data) {

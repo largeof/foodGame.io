@@ -18,7 +18,7 @@ function listen() {
 app.use(express.static('public'));
 
 //if there is url parameter
-app.get("/:word", function(req, res) {
+app.get("/:word", function(req, res) { 
   let word = req.params.word;
   res.sendFile( __dirname + "/public/lobby.html");
 });
@@ -29,32 +29,65 @@ app.get("/:word", function(req, res) {
 var io = require('socket.io')(server);
 var rooms = {};
 
+class foodRoom
+{
+  constructor()
+  {
+    this.players=[];
+  }
+}
+
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
-io.sockets.on('connection',
-  // We are given a websocket object in our function
-  function (socket) {
-  
-    console.log("We have a new client: " + socket.id);
+io.sockets.on('connection', function (socket) 
+{
+  //socket joins
 
-    socket.on('joinroom', function(room) {
-      console.log("The client joined " + room);
-      this.join(room);
-      if (typeof rooms[room] === 'undefined')
-      {
-        rooms[room] = {count: 1};
-      }
-      else
-      {
-        rooms[room].count++;
-      }
-      io.to(room).emit("new user", rooms[room].count)
-    });
-    
+  socket.on('joinroom', function(data) 
+  {
+    console.log("The client joined " + data.room);
+    this.join(data.room);
+
+    //set name
+    socket.nickname=data.nickname;
+    if (typeof rooms[data.room] === 'undefined')
+    {
+      rooms[data.room] = new foodRoom(); 
+      rooms[data.room].players.push({nickname: data.nickname, id: socket.id});
+    }
+    else
+    {
+      rooms[data.room].count++;
+      rooms[data.room].players.push({nickname: data.nickname, id: socket.id});
+    }
+
+    console.log(rooms[data.room].players.length);
+
+    for (let i=0; i<rooms[data.room].players.length; i++)
+    {
+      console.log(rooms[data.room].players[i].nickname);
+    }
+
+
+    io.to(data.room).emit("new user", rooms[data.room].count); // this should give names of players
+
     socket.on('disconnect', function() {
-      //if part of a room subtract them from it?
+      //splice to remove
       console.log("Client has disconnected");
+      //io.to(data.room).emit("User left", blah);
     });
-  }
+  });
+}
 );
+
+function findClientsSocketByRoomId(roomId) {
+  var res = []
+  , room = io.sockets.adapter.rooms[roomId];
+  if (room) {
+      for (var id in room) {
+      res.push(io.sockets.adapter.nsp.connected[id]);
+      }
+  }
+  return res;
+  }
 
