@@ -33,6 +33,8 @@ class foodRoom
 {
   constructor()
   {
+    this.gameStarted=false;
+    this.host;
     this.players=[];
   }
 }
@@ -42,6 +44,8 @@ class foodRoom
 io.sockets.on('connection', function (socket) 
 {
   //socket joins
+
+  //TO DO: make check to see if ok to join room
 
   socket.on('joinroom', function(data) 
   {
@@ -73,8 +77,15 @@ io.sockets.on('connection', function (socket)
 
     socket.on('disconnect', function() {
       //splice to remove
+      for (let i=0; i<rooms[data.room].players.length; i++)
+      {
+        if (rooms[data.room].players[i].id == socket.id)
+        {
+          rooms[data.room].players.splice(i, 1); //removes from list!
+        }
+      }
       console.log("Client has disconnected");
-      //io.to(data.room).emit("User left", blah);
+      //TO DO: update clients to up refresh lists or wateva
     });
   });
 }
