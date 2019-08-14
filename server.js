@@ -43,37 +43,43 @@ class foodRoom
 // This is run for each individual user that connects
 io.sockets.on('connection', function (socket) 
 {
-  //socket joins
-
-  //TO DO: make check to see if ok to join room
-
   socket.on('joinroom', function(data) 
   {
-    console.log("The client joined " + data.room);
-    this.join(data.room);
+
+    //maybe i should do a limbo phase before joining room?
+
+    this.join(data.room); //socket io join function
 
     //set name
     socket.nickname=data.nickname;
-    if (typeof rooms[data.room] === 'undefined')
+    if (typeof rooms[data.room] === 'undefined') //then player creating is the host!
     {
+      console.log("new host!");
+
       rooms[data.room] = new foodRoom(); 
-      rooms[data.room].players.push({nickname: data.nickname, id: socket.id});
+      rooms[data.room].host = socket.id; //set the host to host's id
+      rooms[data.room].players.push({nickname: data.nickname, id: socket.id}); //add player to game
     }
-    else
+    else if (rooms[data.room].gameStarted == false) //then it's ok to join!
     {
-      rooms[data.room].count++;
-      rooms[data.room].players.push({nickname: data.nickname, id: socket.id});
+      console.log("lame joiner");
+
+      socket.emit('requestName'); //new users must give their name. only the host gives name before joining
+      socket.on('getName', function(name)
+      {
+        rooms[data.room].players.push({nickname: data.nickname, id: socket.id}); //add player to game
+      });
+
+      console.log("does code get here? idk");
     }
-
-    console.log(rooms[data.room].players.length);
-
-    for (let i=0; i<rooms[data.room].players.length; i++)
+    else //it's not ok to join... 
     {
-      console.log(rooms[data.room].players[i].nickname);
+      //TODO: kick player! (maybe give a message as to why??)
     }
 
+    //TODO: if here then update user's lists! because some joined or attempted to...
 
-    io.to(data.room).emit("new user", rooms[data.room].count); // this should give names of players
+    //io.to(data.room).emit("new user", rooms[data.room].count); 
 
     socket.on('disconnect', function() {
       //splice to remove
@@ -90,15 +96,4 @@ io.sockets.on('connection', function (socket)
   });
 }
 );
-
-function findClientsSocketByRoomId(roomId) {
-  var res = []
-  , room = io.sockets.adapter.rooms[roomId];
-  if (room) {
-      for (var id in room) {
-      res.push(io.sockets.adapter.nsp.connected[id]);
-      }
-  }
-  return res;
-  }
 
