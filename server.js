@@ -54,27 +54,27 @@ io.sockets.on('connection', function (socket)
     socket.nickname=data.nickname;
     if (typeof rooms[data.room] === 'undefined') //then player creating is the host!
     {
-      console.log("new host!");
-
       rooms[data.room] = new foodRoom(); 
       rooms[data.room].host = socket.id; //set the host to host's id
       rooms[data.room].players.push({nickname: data.nickname, id: socket.id}); //add player to game
+      io.to(data.room).emit("lobbyUpdate", rooms[data.room]); //give clients new game state!!
+
+      socket.emit('goodToJoin', true); //true in regards to isHost
     }
     else if (rooms[data.room].gameStarted == false) //then it's ok to join!
     {
-      console.log("lame joiner");
+      socket.emit('goodToJoin', false); //false in regards to isHost
 
-      socket.emit('requestName'); //new users must give their name. only the host gives name before joining
-      socket.on('getName', function(name)
+      socket.on('nameMessage', function(name)
       {
-        rooms[data.room].players.push({nickname: data.nickname, id: socket.id}); //add player to game
+        console.log("name received");
+        rooms[data.room].players.push({nickname: name, id: socket.id}); //add player to game
+        io.to(data.room).emit("lobbyUpdate", rooms[data.room]); //give clients new game state!!
       });
-
-      console.log("does code get here? idk");
     }
     else //it's not ok to join... 
     {
-      //TODO: kick player! (maybe give a message as to why??)
+      //TODO: kick player! (maybe give a message as to why?? idk)
     }
 
     //TODO: if here then update user's lists! because some joined or attempted to...
@@ -83,15 +83,14 @@ io.sockets.on('connection', function (socket)
 
     socket.on('disconnect', function() {
       //splice to remove
-      for (let i=0; i<rooms[data.room].players.length; i++)
+      for (let i=rooms[data.room].players.length-1; i>=0; i--)
       {
         if (rooms[data.room].players[i].id == socket.id)
         {
           rooms[data.room].players.splice(i, 1); //removes from list!
+          io.to(data.room).emit("lobbyUpdate", rooms[data.room]); //give clients new game state!!
         }
       }
-      console.log("Client has disconnected");
-      //TO DO: update clients to up refresh lists or wateva
     });
   });
 }
